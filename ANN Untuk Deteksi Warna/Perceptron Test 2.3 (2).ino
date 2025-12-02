@@ -45,23 +45,30 @@ int activation(float x) {
   return (x >= 0.5) ? 1 : 0;
 }
 
-// ====== Prediksi Warna Berdasarkan ANN ======
+// ====== Prediksi Warna ANN (gunakan argmax, bukan step) ======
 int predictColor(float R, float G, float B) {
   float inputs[3] = {R, G, B};
   float output[3];
 
-  for (int i = 0; i < 3; ++i) {
+  // Weighted sum
+  for (int i = 0; i < 3; i++) {
     output[i] = bias[i];
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 3; j++) {
       output[i] += inputs[j] * weights[j][i];
     }
-    output[i] = activation(output[i]);
   }
 
-  if (output[0] == 1 && output[1] == 0 && output[2] == 0) return 0; // Merah
-  if (output[0] == 0 && output[1] == 1 && output[2] == 0) return 1; // Hijau
-  if (output[0] == 0 && output[1] == 0 && output[2] == 1) return 2; // Biru
-  return -1; // Tidak dikenali
+  // Argmax = warna paling tinggi
+  int idx = 0;
+  float maxv = output[0];
+  for (int i = 1; i < 3; i++) {
+    if (output[i] > maxv) {
+      maxv = output[i];
+      idx = i;
+    }
+  }
+
+  return idx;   // 0=Merah, 1=Hijau, 2=Biru
 }
 
 // ====== Menyalakan LED Berdasarkan Warna ======
@@ -151,3 +158,4 @@ void loop() {
   showColorLED(result);
   delay(1000);
 }
+
